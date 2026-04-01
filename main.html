@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Tool hỗ trợ chọn Camera & Lens - Vision công nghiệp</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+            color: #1e2a3e;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 24px 28px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            color: #0f3b5c;
+        }
+
+        .sub {
+            color: #4a627a;
+            border-left: 4px solid #2c7da0;
+            padding-left: 16px;
+            margin-bottom: 28px;
+            font-weight: 400;
+        }
+
+        .grid-2 {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 28px;
+        }
+
+        .input-panel {
+            flex: 1.2;
+            min-width: 280px;
+            background: #f9fbfd;
+            padding: 20px;
+            border-radius: 24px;
+            border: 1px solid #e2edf2;
+        }
+
+        .result-panel {
+            flex: 2;
+            min-width: 320px;
+        }
+
+        .param-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #1e4663;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 1rem;
+            border: 1px solid #cbdde6;
+            border-radius: 20px;
+            background: white;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #2c7da0;
+            box-shadow: 0 0 0 3px rgba(44, 125, 160, 0.2);
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: #5f7f9e;
+            margin-top: 5px;
+            margin-left: 8px;
+        }
+
+        button {
+            background: #1e6f5c;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 40px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+            margin-top: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            background: #0e5a48;
+            transform: translateY(-1px);
+        }
+
+        .result-card {
+            background: #ffffff;
+            border-radius: 24px;
+            border: 1px solid #e0edf2;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+        }
+
+        .result-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            border-left: 5px solid #1e6f5c;
+            padding-left: 14px;
+            margin-top: 0;
+            margin-bottom: 18px;
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eef3f7;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #2c5a74;
+        }
+
+        .warning {
+            background: #fff3e0;
+            border-left: 5px solid #e6a017;
+            padding: 12px 16px;
+            border-radius: 18px;
+            margin: 15px 0;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #e1f0f5;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 6px;
+        }
+
+        footer {
+            font-size: 0.75rem;
+            text-align: center;
+            margin-top: 28px;
+            color: #6c8eaa;
+            border-top: 1px solid #e2edf2;
+            padding-top: 20px;
+        }
+
+        @media (max-width: 780px) {
+            .container {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📸 Vision Tool: Camera + Lens Selector</h1>
+        <div class="sub">Dựa trên FOV, độ chính xác & khoảng cách làm việc – gợi ý thông số kỹ thuật phù hợp</div>
+
+        <div class="grid-2">
+            <!-- KHUNG NHẬP LIỆU -->
+            <div class="input-panel">
+                <div class="param-group">
+                    <label>📏 Trường nhìn (FOV) <span style="font-weight:normal">(mm)</span></label>
+                    <input type="number" id="fov" value="1000" step="10" placeholder="Ví dụ: 1000 (1m)">
+                    <div class="hint">Chiều ngang vùng cần quan sát (mm)</div>
+                </div>
+                <div class="param-group">
+                    <label>🔍 Kích thước chi tiết nhỏ nhất (mm)</label>
+                    <input type="number" id="feature" value="0.1" step="0.01" placeholder="0.1">
+                    <div class="hint">Độ lớn lỗi / vật nhỏ nhất cần phát hiện</div>
+                </div>
+                <div class="param-group">
+                    <label>📷 Khoảng cách làm việc WD (mm)</label>
+                    <input type="number" id="wd" value="1000" step="50" placeholder="mm từ mặt lens tới vật">
+                    <div class="hint">Khoảng cách thực tế có thể lắp đặt</div>
+                </div>
+                <div class="param-group">
+                    <label>⚙️ Hệ số Nyquist (pixel / feature)</label>
+                    <select id="nyquist">
+                        <option value="2">2.0 (Đo lường chính xác, khuyến nghị)</option>
+                        <option value="1.5">1.5 (Phát hiện cơ bản, giảm yêu cầu pixel)</option>
+                        <option value="2.5">2.5 (Cực kỳ chính xác, chống aliasing)</option>
+                    </select>
+                </div>
+                <div class="param-group">
+                    <label>🏭 Vật thể có chuyển động nhanh?</label>
+                    <select id="motion">
+                        <option value="static">Đứng yên hoặc chậm (&lt; 0.1 m/s)</option>
+                        <option value="fast">Chuyển động nhanh (băng tải, robot)</option>
+                    </select>
+                </div>
+                <div class="param-group">
+                    <label>🎯 Loại ứng dụng ưu tiên</label>
+                    <select id="apptype">
+                        <option value="inspection">Phát hiện lỗi / kiểm tra bề mặt</option>
+                        <option value="measurement">Đo lường kích thước chính xác</option>
+                    </select>
+                </div>
+                <button id="calcBtn">🔧 TÍNH TOÁN & ĐỀ XUẤT</button>
+                <div class="hint" style="margin-top: 12px;">* Dựa trên nguyên lý Nyquist & công thức tiêu cự cơ bản. Kết
+                    quả mang tính tham khảo, cần xác nhận với nhà cung cấp.</div>
+            </div>
+
+            <!-- KẾT QUẢ -->
+            <div class="result-panel" id="resultPanel">
+                <div class="result-card">
+                    <div class="result-title">⚙️ Thông số yêu cầu</div>
+                    <div id="reqSummary">Nhập thông số và nhấn "Tính toán"</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-title">📷 Đề xuất Camera</div>
+                    <div id="cameraRec">--</div>
+                </div>
+                <div class="result-card">
+                    <div class="result-title">🔎 Đề xuất Lens & Bố trí</div>
+                    <div id="lensRec">--</div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            💡 Ghi chú: Khi độ phân giải yêu cầu > 20MP, tool sẽ đề xuất giải pháp Line Scan hoặc multi-camera.<br>
+            Công thức: Pixel yêu cầu = (FOV / Feature) × Nyquist. Tiêu cự f ≈ (WD × Sensor_size_ngang) / FOV
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            // Dữ liệu camera mẫu (độ phân giải phổ biến, kích thước cảm biến điển hình)
+            // Mỗi entry: resolution MP, width_px, height_px, sensor_width_mm (tiêu biểu), loại khuyến nghị, ghi chú
+            const cameraDB = [
+                { mp: 1.2, pxW: 1280, pxH: 960, sensorW: 6.1, name: "1.2MP (1280x960)", type: "area", note: "Cơ bản, phù hợp FOV nhỏ" },
+                { mp: 2.0, pxW: 1600, pxH: 1200, sensorW: 6.4, name: "2MP (1600x1200)", type: "area", note: "Phổ thông, chi phí thấp" },
+                { mp: 5.0, pxW: 2592, pxH: 1944, sensorW: 7.2, name: "5MP (2592x1944)", type: "area", note: "Cân bằng tốt" },
+                { mp: 8.0, pxW: 3840, pxH: 2160, sensorW: 7.7, name: "8MP 4K (3840x2160)", type: "area", note: "Độ nét cao" },
+                { mp: 12.0, pxW: 4096, pxH: 3000, sensorW: 11.1, name: "12MP (4096x3000)", type: "area", note: "Chi tiết tốt" },
+                { mp: 20.0, pxW: 5472, pxH: 3648, sensorW: 13.2, name: "20MP (5472x3648)", type: "area", note: "Cảm biến 1 inch" },
+                { mp: 31.0, pxW: 6464, pxH: 4852, sensorW: 23.0, name: "31MP (6464x4852)", type: "area", note: "APS-C like, cần lens chất lượng" },
+                { mp: 45.0, pxW: 8192, pxH: 5460, sensorW: 28.0, name: "45MP (8192x5460)", type: "area", note: "Full-frame, giá cao" },
+                { mp: 65.0, pxW: 9344, pxH: 7000, sensorW: 36.0, name: "65MP (9344x7000)", type: "area", note: "Siêu phân giải, lens chuyên dụng" }
+            ];
+
+            // Line scan gợi ý
+            const lineScanOptions = [
+                { name: "Camera Line Scan 4k (4096 px)", pixelSize: 0.025, note: "Phù hợp FOV vừa" },
+                { name: "Camera Line Scan 8k (8192 px)", pixelSize: 0.015, note: "Độ phân giải cao" },
+                { name: "Camera Line Scan 16k (16384 px)", pixelSize: 0.008, note: "Đáp ứng feature 0.1mm trên FOV 1000mm" },
+                { name: "Camera Line Scan 24k (24576 px)", pixelSize: 0.005, note: "Siêu nét, chi phí cao" }
+            ];
+
+            const calcBtn = document.getElementById('calcBtn');
+            const reqSummaryDiv = document.getElementById('reqSummary');
+            const cameraRecDiv = document.getElementById('cameraRec');
+            const lensRecDiv = document.getElementById('lensRec');
+
+            function formatNumber(x) { return Number(x).toLocaleString('en-US', { maximumFractionDigits: 2 }); }
+
+            function compute() {
+                // Lấy giá trị đầu vào
+                let fov = parseFloat(document.getElementById('fov').value);
+                let feature = parseFloat(document.getElementById('feature').value);
+                let wd = parseFloat(document.getElementById('wd').value);
+                let nyquist = parseFloat(document.getElementById('nyquist').value);
+                let motion = document.getElementById('motion').value;
+                let appType = document.getElementById('apptype').value;
+
+                if (isNaN(fov) || fov <= 0 || isNaN(feature) || feature <= 0 || isNaN(wd) || wd <= 0) {
+                    reqSummaryDiv.innerHTML = '<span style="color:#c7362b;">❌ Vui lòng nhập đầy đủ thông số hợp lệ (FOV, feature, WD > 0).</span>';
+                    cameraRecDiv.innerHTML = '--';
+                    lensRecDiv.innerHTML = '--';
+                    return;
+                }
+
+                // 1. Tính độ phân giải yêu cầu (chiều ngang)
+                let requiredPixels = (fov / feature) * nyquist;
+                requiredPixels = Math.ceil(requiredPixels);
+                let requiredMP = (requiredPixels * requiredPixels * 3 / 4) / 1e6;  // giả định tỷ lệ 4:3 cho diện tích
+
+                // Hiển thị yêu cầu cơ bản
+                reqSummaryDiv.innerHTML = `
+                <div class="spec-row"><span class="spec-label">📐 FOV (mm):</span> <span>${formatNumber(fov)}</span></div>
+                <div class="spec-row"><span class="spec-label">🔬 Feature nhỏ nhất (mm):</span> <span>${formatNumber(feature)}</span></div>
+                <div class="spec-row"><span class="spec-label">🎯 Hệ số Nyquist:</span> <span>${nyquist}</span></div>
+                <div class="spec-row"><span class="spec-label">📏 Pixel yêu cầu (ngang):</span> <span><strong>${requiredPixels.toLocaleString()} px</strong></span></div>
+                <div class="spec-row"><span class="spec-label">📷 MP tương đương (≈4:3):</span> <span>~${requiredMP.toFixed(1)} Megapixel</span></div>
+                <div class="spec-row"><span class="spec-label">⚡ Vật thể chuyển động:</span> <span>${motion === 'fast' ? 'Có - cần Global Shutter' : 'Tĩnh/chậm'}</span></div>
+            `;
+
+                // 2. Kiểm tra nếu yêu cầu quá lớn -> line scan / multi camera
+                let isLineScanRequired = (requiredPixels > 6500) || (requiredMP > 25);
+                let cameraSuggestion = "";
+                let selectedSensorW = 7.2; // default 1/1.8"
+                let selectedCamName = "";
+
+                if (isLineScanRequired) {
+                    // Gợi ý line scan
+                    cameraSuggestion = `<div class="warning">⚠️ Yêu cầu độ phân giải rất cao (>${requiredPixels.toLocaleString()} px ngang). <br>Camera diện tích (area scan) thông thường không đáp ứng. Giải pháp khả thi:</div>`;
+                    cameraSuggestion += `<ul style="margin-top: 8px;">`;
+                    for (let ls of lineScanOptions) {
+                        cameraSuggestion += `<li><strong>${ls.name}</strong> – ${ls.note}</li>`;
+                    }
+                    cameraSuggestion += `</ul><div class="warning">💡 Kết hợp encoder đồng bộ băng tải và đèn Line Light cường độ cao. Độ chính xác đạt ~ ${(fov / 16384).toFixed(3)} mm/pixel với 16k.</div>`;
+                    if (appType === "measurement") {
+                        cameraSuggestion += `<div class="warning">📏 Ứng dụng đo lường: nên dùng telecentric kết hợp line scan nếu yêu cầu độ chính xác cao và ổn định theo chiều sâu.</div>`;
+                    }
+                    cameraRecDiv.innerHTML = cameraSuggestion;
+                    // lens khuyến nghị cho line scan (tạm thời)
+                    let lsLensNote = `Với line scan, cần lens F-mount hoặc M72 hỗ trợ cảm biến dài ~${(requiredPixels * 0.0035).toFixed(1)}mm (nếu pixel 3.5µm). Tính WD: f ≈ (WD × chiều dài cảm biến)/FOV. <br> 
+                🔧 Ví dụ: cảm biến 57mm (16k, 3.5µm), WD ${wd}mm, FOV ${fov}mm → tiêu cự ≈ ${(wd * 57 / fov).toFixed(1)} mm. Chọn lens tiêu cự tương ứng (60mm, 90mm) kèm ống nối.`;
+                    lensRecDiv.innerHTML = `<div>${lsLensNote}</div><div class="hint">⚠️ Khoảng cách làm việc thực tế cần hiệu chỉnh theo lens cụ thể. Liên hệ nhà cung cấp để có thiết kế chính xác.</div>`;
+                    return;
+                }
+
+                // 3. Với area scan: tìm camera phù hợp (có pxW >= requiredPixels)
+                let suitableCams = cameraDB.filter(cam => cam.pxW >= requiredPixels);
+                if (suitableCams.length === 0) {
+                    // fallback lấy camera cao nhất
+                    suitableCams = [cameraDB[cameraDB.length - 1]];
+                }
+                // ưu tiên camera có pxW gần nhất nhưng vừa đủ
+                let bestCam = suitableCams.reduce((prev, curr) => {
+                    return (curr.pxW - requiredPixels) < (prev.pxW - requiredPixels) ? curr : prev;
+                });
+                selectedSensorW = bestCam.sensorW;
+                selectedCamName = bestCam.name;
+
+                // Xây dựng đề xuất camera
+                let shutterNote = "";
+                if (motion === "fast") {
+                    shutterNote = "✅ Vật chuyển động nhanh → bắt buộc chọn camera có Global Shutter (màn trập toàn cục).";
+                } else {
+                    shutterNote = "✅ Vật tĩnh / chậm: có thể dùng Rolling Shutter (tiết kiệm chi phí) nhưng nên ưu tiên Global để linh hoạt.";
+                }
+                cameraSuggestion = `
+                <div class="spec-row"><span class="spec-label">🎥 Camera đề xuất:</span> <span><strong>${bestCam.name}</strong> (${bestCam.pxW} x ${bestCam.pxH})</span></div>
+                <div class="spec-row"><span class="spec-label">📏 Độ phân giải thực tế (mm/pixel):</span> <span>~${(fov / bestCam.pxW).toFixed(3)} mm/pixel</span></div>
+                <div class="spec-row"><span class="spec-label">🧩 Kích thước cảm biến (ngang):</span> <span>${bestCam.sensorW} mm (điển hình)</span></div>
+                <div class="spec-row"><span class="spec-label">⚡ Shutter khuyến nghị:</span> <span>${shutterNote}</span></div>
+                <div class="spec-row"><span class="spec-label">💡 Ghi chú:</span> <span>${bestCam.note}</span></div>
+            `;
+                if (requiredPixels > bestCam.pxW * 0.9 && (bestCam.pxW - requiredPixels) < 200) {
+                    cameraSuggestion += `<div class="warning">⚠️ Camera được chọn có độ phân giải sát với yêu cầu tối thiểu. Để dự phòng (calibration, lệch FOV), nên cân nhắc camera cao hơn 1 bậc (VD: ${suitableCams.length > 1 ? suitableCams[1].name : "lớn hơn"}).</div>`;
+                }
+
+                // 4. Tính tiêu cự Lens
+                let focalLength = (wd * selectedSensorW) / fov;
+                focalLength = Math.round(focalLength * 10) / 10;
+                let lensNote = "";
+                let lensFamily = "";
+                if (focalLength < 8) {
+                    lensNote = "⚠️ Tiêu cự quá ngắn (<8mm), dễ bị méo hình (distortion) lớn. Nên tăng WD hoặc giảm FOV hoặc chọn lens telecentric nếu đo lường.";
+                    lensFamily = "Lens góc siêu rộng (cần hiệu chỉnh méo)";
+                } else if (focalLength >= 8 && focalLength <= 50) {
+                    lensFamily = "FA Lens (C-mount) tiêu chuẩn, dễ tìm";
+                    lensNote = `👍 Phổ biến, chọn lens có khẩu độ F/# phù hợp với độ sâu trường ảnh.`;
+                } else if (focalLength > 50 && focalLength <= 100) {
+                    lensFamily = "Lens tiêu cự trung bình (C-mount hoặc F-mount)";
+                    lensNote = `Có thể cần ống nối (spacer) để đạt WD chính xác. Kiểm tra khả năng hỗ trợ sensor size ${bestCam.sensorW}mm.`;
+                } else {
+                    lensFamily = "Lens tiêu cự dài (F-mount, M42, M58)";
+                    lensNote = `Yêu cầu WD lớn, lens chuyên dụng cho machine vision. Cân nhắc telecentric nếu đo lường chính xác.`;
+                }
+
+                // Depth of field sơ bộ và khẩu độ khuyến nghị
+                let apertureAdvice = "";
+                if (appType === "measurement") {
+                    apertureAdvice = "🔍 Ứng dụng đo lường: nên dùng lens telecentric hoặc khẩu độ vừa (F/4 - F/8) kết hợp ánh sáng tốt để tránh sai số do góc nhìn.";
+                } else {
+                    apertureAdvice = "🎨 Phát hiện lỗi: có thể dùng khẩu độ lớn (F/2.8 - F/4) nếu DOF cho phép, giúp giảm exposure time.";
+                }
+
+                lensRecDiv.innerHTML = `
+                <div class="spec-row"><span class="spec-label">🔎 Tiêu cự tính toán (f):</span> <span><strong>${focalLength} mm</strong></span></div>
+                <div class="spec-row"><span class="spec-label">📦 Phân loại lens:</span> <span>${lensFamily}</span></div>
+                <div class="spec-row"><span class="spec-label">📐 Khoảng cách làm việc (WD):</span> <span>${wd} mm (theo yêu cầu)</span></div>
+                <div class="spec-row"><span class="spec-label">⚙️ Khẩu độ & DOF:</span> <span>${apertureAdvice}</span></div>
+                <div class="spec-row"><span class="spec-label">⚠️ Lưu ý:</span> <span>${lensNote}</span></div>
+                <div style="margin-top: 12px; background:#eef2fa; padding: 10px; border-radius: 18px;">
+                💡 <strong>Kiểm tra nhanh:</strong> Với cảm biến ${bestCam.sensorW}mm ngang, lens ${focalLength}mm, WD ${wd}mm → FOV thực tế ≈ ${(bestCam.sensorW * wd / focalLength).toFixed(1)} mm. Nếu sai lệch so với mong muốn (${fov}mm), cần điều chỉnh WD hoặc chọn lens gần nhất và tính lại khoảng cách.
+                </div>
+            `;
+
+                cameraRecDiv.innerHTML = cameraSuggestion;
+            }
+
+            calcBtn.addEventListener('click', compute);
+            // chạy thử với giá trị mặc định khi load trang
+            window.addEventListener('DOMContentLoaded', compute);
+        })();
+    </script>
+</body>
+
+</html>

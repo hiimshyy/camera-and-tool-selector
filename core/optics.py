@@ -5,7 +5,7 @@ working_distance_mm is assumed to approximate object distance (o)
 in thin lens model. Real systems may have mechanical offsets.
 """
 
-from typing import Union
+# from typing import Union
 
 
 def calculate_fov(
@@ -86,7 +86,7 @@ def calculate_focal_length(
     Args:
         sensor_width_mm: Sensor width in mm (must be > 0)
         fov_width_mm: Desired FOV width in mm (must be > 0)
-        working_distance_mm: Object distance in mm (must be > 0)
+        working_distance_mm: Working distance in mm (approximates object distance) (must be > 0)
 
     Returns:
         Focal length in mm

@@ -1,11 +1,9 @@
 """
-optics module
+PURE: stateless physics functions only
 
 working_distance_mm is assumed to approximate object distance (o)
 in thin lens model. Real systems may have mechanical offsets.
 """
-
-# from typing import Union
 
 
 def calculate_fov(
@@ -132,3 +130,43 @@ def calculate_resolution(
         raise ValueError("sensor_pixels_x must be positive")
 
     return fov_width_mm / sensor_pixels_x
+
+
+def calculate_magnification_from_focal_length(
+    focal_length_mm: float,
+    working_distance_mm: float
+) -> float:
+    """
+    Calculate magnification from focal length and working distance.
+
+    Formula: M = f / (WD - f)
+
+    Derivation:
+    1. For thin lens: M = i / o where i = image distance, o = object distance
+    2. Lens equation: 1/f = 1/o + 1/i  =>  i = (f × o) / (o - f)
+    3. Substituting: M = i/o = f / (o - f), where o ≈ working_distance
+
+    Assumptions:
+    - Thin lens model
+    - Working distance approximates object distance from lens principal plane
+    - WD > f for real image formation
+
+    Args:
+        focal_length_mm: Lens focal length in mm (must be > 0)
+        working_distance_mm: Working distance in mm (must be > f)
+
+    Returns:
+        Magnification (dimensionless)
+
+    Raises:
+        ValueError: If focal_length <= 0 or WD <= focal_length
+    """
+    if focal_length_mm <= 0:
+        raise ValueError("focal_length_mm must be positive")
+    if working_distance_mm <= focal_length_mm:
+        raise ValueError(
+            f"working_distance_mm ({working_distance_mm}) must be greater than "
+            f"focal_length_mm ({focal_length_mm}) for real image formation"
+        )
+
+    return focal_length_mm / (working_distance_mm - focal_length_mm)

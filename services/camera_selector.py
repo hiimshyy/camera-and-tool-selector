@@ -20,7 +20,6 @@ def select_cameras(
 
     Selection logic:
     1. Camera pixel size must be <= required resolution (mm/pixel)
-       (Pixel size is a proxy for resolution capability.)
     2. Sensor aspect ratio should be within 20% of required FOV aspect ratio.
 
     Note:

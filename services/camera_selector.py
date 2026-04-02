@@ -7,6 +7,7 @@ Filters and selects cameras based on resolution and sensor requirements.
 from typing import List
 from models.requirement import VisionRequirement
 from models.camera import Camera
+from core.normalization import resolution_to_mm_per_pixel
 
 
 def select_cameras(
@@ -18,7 +19,8 @@ def select_cameras(
     compatible with the required FOV.
 
     Selection logic:
-    1. Camera resolution must meet or exceed required pixels in both dimensions.
+    1. Camera pixel size must be <= required resolution (mm/pixel)
+       (Pixel size is a proxy for resolution capability.)
     2. Sensor aspect ratio should be within 20% of required FOV aspect ratio.
 
     Note:
@@ -33,12 +35,10 @@ def select_cameras(
     Returns:
         Subset of cameras that pass both filters (preserving original order)
     """
-    # Convert required resolution from µm/pixel to mm/pixel
-    required_resolution_mm_per_pixel = requirement.required_resolution_um_per_pixel / 1000.0
-
-    # Compute minimum required pixels for each dimension
-    required_pixels_x = requirement.fov_width_mm / required_resolution_mm_per_pixel
-    required_pixels_y = requirement.fov_height_mm / required_resolution_mm_per_pixel
+    # Convert required resolution from µm/pixel to mm/pixel using normalization
+    required_resolution_mm_per_pixel = resolution_to_mm_per_pixel(
+        requirement.required_resolution_um_per_pixel
+    )
 
     # Required FOV aspect ratio (width/height)
     required_aspect_ratio = requirement.fov_width_mm / requirement.fov_height_mm
@@ -49,9 +49,9 @@ def select_cameras(
     selected: List[Camera] = []
 
     for camera in cameras:
-        # Filter 1: Resolution capability
-        # Camera must have at least the required number of pixels in both dimensions
-        if camera.resolution_x < required_pixels_x or camera.resolution_y < required_pixels_y:
+        # Filter 1: Resolution capability via pixel size
+        # Camera pixel size must be at least as fine (smaller) than required resolution.
+        if camera.pixel_size_mm > required_resolution_mm_per_pixel:
             continue
 
         # Filter 2: Sensor size compatibility (aspect ratio)
